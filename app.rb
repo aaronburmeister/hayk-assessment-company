@@ -46,26 +46,13 @@ class Company
         DB[:conn].execute(sql, @name)      
     end
 
-    def self.all
-        sql = <<-SQL
-            SELECT * FROM companies
-            SQL
-        database = DB[:conn].execute(sql)
-        if @@loaded == false
-            database.each { |row| 
-                Company.new(row[1],row[2],row[0])
-            }
-            @@loaded == true
-        end
-        @@all
-    end
-
+    
     def update_sql(column, value)
         sql = <<-SQL
-            UPDATE companies SET #{column} = #{value} WHERE id = #{@id}
-            SQL
+        UPDATE companies SET #{column} = #{value} WHERE id = #{@id}
+        SQL
     end
-
+    
     def update
         puts "Would you like to update the company name or number of employees?"
         puts "Please type \"name\" or \"employees\"."
@@ -91,25 +78,25 @@ class Company
             self.update
         end
     end
-
+    
     def delete
         sql = <<-SQL
-            DELETE FROM companies WHERE id = #{@id}
-            SQL
+        DELETE FROM companies WHERE id = #{@id}
+        SQL
         puts "You're about to delete this company. Are you sure you want to do this? (Y/N)"
         input = gets.strip
         if input.upcase == "Y"
             DB[:conn].execute(sql)
             puts "#{self.name} has been deleted!"
-            # count = 0
-            # index = nil
-            # @@all.each {|company|
-            #     if company == self
-            #         index = count
-            #     end
-            #     count +=1
-            # }
-            # @@all.delete_at(index)
+            count = 0
+            index = nil
+            @@all.each {|company|
+                if company == self
+                    index = count
+                end
+                count +=1
+            }
+            @@all.delete_at(index)
         elsif input.upcase == "N"
             puts "Ah, I didn't think so. That was close!"
         else
@@ -117,5 +104,18 @@ class Company
             self.delete
         end
     end
-        
+    
+    def self.all
+        sql = <<-SQL
+            SELECT * FROM companies
+            SQL
+        database = DB[:conn].execute(sql)
+        if @@loaded == false
+            database.each { |row| 
+                Company.new(row[1],row[2],row[0])
+            }
+            @@loaded = true
+        end
+        @@all
+    end
 end
